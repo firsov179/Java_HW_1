@@ -1,13 +1,11 @@
-import java.util.ArrayList;
 import java.util.Objects;
 import java.util.Scanner;
-import java.util.function.Function;
 
 public class Main {
 
     public static int pveGame(int player, boolean hard) {
         Game s = new Game();
-        while (!s.isFinished()) {
+        while (s.isActive()) {
              if (s.getRound() % 2 == player) {
                  s.playerRound();
              } else if (hard) {
@@ -25,7 +23,7 @@ public class Main {
 
     static void pvpGame() {
         Game s = new Game();
-        while (!s.isFinished()) {
+        while (s.isActive()) {
             s.playerRound();
         }
         s.printResult();
