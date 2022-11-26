@@ -1,6 +1,5 @@
 import java.util.Objects;
 import java.util.Scanner;
-import java.util.function.Function;
 
 public class Game {
     private PersistentInt[][] map = new PersistentInt[8][8];
@@ -24,15 +23,15 @@ public class Game {
         updateOptions();
     }
 
-    public boolean isFinished() {
-        return finished;
+    public boolean isActive() {
+        return !finished;
     }
 
     public int getRound() {
         return round;
     }
 
-    public void reverse() {
+    public void cancel() {
         for (int i = 0; i < 8; ++i) {
             for (int j = 0; j < 8; ++j) {
                 map[i][j].remove(round);
@@ -40,14 +39,14 @@ public class Game {
         }
     }
 
-    public int easyAIRound() {
+    public double easyAIRound() {
         MyPair ans = new MyPair(-1, -1);
-        int ansCount = -1;
+        double ansCount = -1;
         for (int i = 0; i < 8; ++i) {
             for (int j = 0; j < 8; ++j) {
                 if (map[i][j].get() == 3) {
-                    int curCount = updateColors(i, j);
-                    reverse();
+                    double curCount = updateColors(i, j);
+                    cancel();
                     if (curCount > ansCount) {
                         ansCount = curCount;
                         ans = new MyPair(i, j);
@@ -67,18 +66,18 @@ public class Game {
             return;
         }
         MyPair ans = new MyPair(-1, -1);
-        int ansCount = -100;
+        double ansCount = -100;
         for (int i = 0; i < 8; ++i) {
             for (int j = 0; j < 8; ++j) {
                 if (map[i][j].get() == 3) {
-                    int curCount = updateColors(i, j);
+                    double curCount = updateColors(i, j);
                     round++;
                     updateOptions();
                     curCount -= easyAIRound();
                     round--;
-                    reverse();
+                    cancel();
                     round--;
-                    reverse();
+                    cancel();
                     if (curCount > ansCount) {
                         ansCount = curCount;
                         ans = new MyPair(i, j);
@@ -92,7 +91,7 @@ public class Game {
         updateOptions();
     }
 
-    public Function playerRound() {
+    public void playerRound() {
         print();
         while (true) {
             MyPair input = read();
@@ -105,7 +104,6 @@ public class Game {
         }
         updateOptions();
         print();
-        return null;
     }
 
     public MyPair printResult() {
@@ -145,11 +143,11 @@ public class Game {
                     System.out.println("Еще не было ходов.");
                     continue;
                 }
-                reverse();
+                cancel();
                 round--;
-                reverse();
+                cancel();
                 round--;
-                reverse();
+                cancel();
                 print();
             } else if (Objects.equals(inp, "\\options")) {
                 if (!options) {
@@ -175,8 +173,14 @@ public class Game {
         }
     }
 
-    private int updateColors(int i, int j) {
-        int res = 1;
+    private double updateColors(int i, int j) {
+        double res = 0;
+        if ((i == 0 || i == 7) && (j == 0 || j == 7)) {
+            res = 0.8;
+        } else if ((i == 0 || i == 7) || (j == 0 || j == 7)) {
+            res = 0.4;
+        }
+
         map[i][j].add(1 + round % 2, round);
         for (int i_delta = -1; i_delta < 2; ++i_delta) {
             for (int j_delta = -1; j_delta < 2; ++j_delta) {
@@ -197,7 +201,13 @@ public class Game {
                         x -= i_delta;
                         y -= j_delta;
                         map[x][y].add(1 + round % 2, round);
-                        res++;
+                        if ((x == 0 || x == 7) && (y == 0 || y == 7)) {
+                            res += 4;
+                        } else if ((x == 0 || x == 7) || (y == 0 || y == 7)) {
+                            res += 2;
+                        } else {
+                            res += 1;
+                        }
                     }
                 }
             }
